@@ -1,0 +1,12 @@
+import { chromium } from 'playwright-core';
+const exe = '/root/.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell';
+const browser = await chromium.launch({ executablePath: exe, args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox'] });
+const page = await browser.newPage({ viewport: { width: 960, height: 1080 } });
+page.on('console', m => console.log('[page]', m.type(), m.text().slice(0,200)));
+await page.goto('http://127.0.0.1:8777/glb.html?model=rindo.glb');
+await page.waitForFunction(() => window.__glbDebug && (window.__glbDebug.error || window.__glbDebug.modelLoaded || window.__glbDebug.hairFlexDeg), null, { timeout: 90000 }).catch(()=>{});
+const dbg = await page.evaluate(() => window.__glbDebug || null);
+console.log('DEBUG:', JSON.stringify(dbg => dbg, null, 0) === null ? '' : '');
+console.log('debug:', JSON.stringify(dbg));
+await page.screenshot({ path: '/root/face3d-headless/nori-first.png' });
+await browser.close();
